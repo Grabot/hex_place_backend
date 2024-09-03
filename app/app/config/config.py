@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     REDDIT_USER: str = "https://oauth.reddit.com/api/v1/me"
     REDDIT_CLIENT_ID: str = os.environ.get("REDDIT_CLIENT_ID", None)
     REDDIT_CLIENT_SECRET: str = os.environ.get("REDDIT_CLIENT_SECRET", None)
-    REDDIT_REDIRECT: str = "https://ageof.gold/login/reddit/callback"
+    REDDIT_REDIRECT: str = "https://hexplace.eu/login/reddit/callback"
 
     jwk: dict = {
         "alg": os.environ.get("JWT_ALG", ""),
@@ -73,7 +73,7 @@ class Settings(BaseSettings):
         "kid": os.environ.get("JWT_KID", ""),
         "typ": os.environ.get("JWT_TYP", ""),
     }
-    map_size: int = 50
+    map_size: int = 250
     JWT_SUB: str = os.environ.get("JWT_SUB", "")
     JWT_ISS: str = os.environ.get("JWT_ISS", "")
     JWT_AUD: str = os.environ.get("JWT_AUD", "")

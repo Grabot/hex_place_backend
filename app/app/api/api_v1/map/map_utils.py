@@ -89,12 +89,12 @@ def get_tiles(hexagon_id, q, r):
     ]
 
 
-async def go_right(db: AsyncSession, q, r, q_tiles, r_tiles):
+async def go_right(db: AsyncSession, q, r, q_tiles, r_tiles, distance):
     # q = 9
     # r = -4
     # Go right so q += 1
     index = 0
-    while index < settings.map_size:
+    while index < distance:
         q += 1
         hexagon = Hexagon(q=q, r=r, tiles_detail="{}")
         db.add(hexagon)
@@ -114,12 +114,12 @@ async def go_right(db: AsyncSession, q, r, q_tiles, r_tiles):
     return [q, r, q_tiles, r_tiles]
 
 
-async def go_left(db: AsyncSession, q, r, q_tiles, r_tiles):
+async def go_left(db: AsyncSession, q, r, q_tiles, r_tiles, distance):
     # q = -9
     # r = 4
     # Go left so q -= 1
     index = 0
-    while index < settings.map_size:
+    while index < distance:
         q -= 1
         hexagon = Hexagon(q=q, r=r, tiles_detail="{}")
         db.add(hexagon)
@@ -181,3 +181,5 @@ async def go_right_down(db: AsyncSession, q, r, q_tiles, r_tiles):
     db.add(hexagon)
     await db.commit()
     return [q, r, q_tiles, r_tiles]
+
+

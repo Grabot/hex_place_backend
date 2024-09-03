@@ -32,6 +32,7 @@ class User(SQLModel, table=True):
     tile_lock: datetime = Field(default=datetime.utcnow())
     email_verified: bool = Field(default=False)
     default_avatar: bool = Field(default=True)
+    is_admin: bool = Field(default=False)
 
     tokens: List["UserToken"] = Relationship(back_populates="user")
 
@@ -184,6 +185,7 @@ class User(SQLModel, table=True):
             "friends": self.get_friend_ids(),
             "avatar": self.get_user_avatar(True),
             "guild": self.guild.serialize if self.guild else None,
+            "is_admin": self.is_admin,
         }
 
     @property
