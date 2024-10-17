@@ -73,7 +73,7 @@ class Settings(BaseSettings):
         "kid": os.environ.get("JWT_KID", ""),
         "typ": os.environ.get("JWT_TYP", ""),
     }
-    map_size: int = 250
+    map_size: int = 150
     JWT_SUB: str = os.environ.get("JWT_SUB", "")
     JWT_ISS: str = os.environ.get("JWT_ISS", "")
     JWT_AUD: str = os.environ.get("JWT_AUD", "")

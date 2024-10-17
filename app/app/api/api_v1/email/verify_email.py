@@ -68,7 +68,7 @@ async def verify_email_get(
     refresh_token_expiration = int(time.time()) + refresh_expiration_time
     reset_token = user_request.generate_auth_token(access_expiration_time).decode("ascii")
     refresh_reset_token = user_request.generate_auth_token(refresh_expiration_time).decode("ascii")
-    subject = "Age of Gold - Verify your email"
+    subject = "Hex Place - Verify your email"
     body = verification_email.format(
         base_url=settings.BASE_URL, token=reset_token, refresh_token=refresh_reset_token
     )

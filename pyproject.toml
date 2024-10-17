@@ -11,9 +11,9 @@ ensure_newline_before_comments = true
 skip = ["app/migrations/env.py"]
 
 [tool.poetry]
-name = "age of gold"
-version = "0.1.0"
-description = "Age of Gold is a fun trading game. The first single player game that you play with multiple people"
+name = "hex place"
+version = "1.0.0"
+description = "Hex place is the place you go when you want to play with the bestagons"
 authors = ["Grabot"]
 license = "GPL-3.0 license"
 readme = "README.md"
