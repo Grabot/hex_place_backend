@@ -56,6 +56,15 @@ class Settings(BaseSettings):
     REDDIT_CLIENT_SECRET: str = os.environ.get("REDDIT_CLIENT_SECRET", None)
     REDDIT_REDIRECT: str = "https://hexplace.eu/login/reddit/callback"
 
+    APPLE_AUTHORIZE: str = "https://appleid.apple.com/auth/token"
+    APPLE_CLIENT_ID: str = os.environ.get("APPLE_CLIENT_ID", None)
+    APPLE_AUD_URL: str = "https://appleid.apple.com"
+    APPLE_KEY_ID: str = os.environ.get("APPLE_KEY_ID", None)
+    APPLE_TEAM_ID: str = os.environ.get("APPLE_TEAM_ID", None)
+    APPLE_AUTH_KEY: str = os.environ.get("APPLE_AUTH_KEY", None)
+    APPLE_GRANT_TYPE: str = "authorization_code"
+    APPLE_REDIRECT_URL: str = os.environ.get("APPLE_REDIRECT_URL", None)
+
     jwk: dict = {
         "alg": os.environ.get("JWT_ALG", ""),
         "crv": os.environ.get("JWT_CRV", ""),
