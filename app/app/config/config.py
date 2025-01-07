@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    BASE_URL: str = os.environ.get("BASE_URL")
+
     API_V1_STR: str = "/api/v1.0"
     API_LOGIN_STR: str = "/login"
 
@@ -64,6 +66,8 @@ class Settings(BaseSettings):
     APPLE_AUTH_KEY: str = os.environ.get("APPLE_AUTH_KEY", None)
     APPLE_GRANT_TYPE: str = "authorization_code"
     APPLE_REDIRECT_URL: str = os.environ.get("APPLE_REDIRECT_URL", None)
+
+    PACKAGE_NAME: str = "eu.hexplace.hex_place"
 
     jwk: dict = {
         "alg": os.environ.get("JWT_ALG", ""),

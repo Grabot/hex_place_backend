@@ -12,7 +12,11 @@ from fastapi import Depends, Request, status, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 import jwt
-from time import time 
+from time import time
+from pydantic import BaseModel
+from typing import Annotated
+from fastapi import Form
+
 
 
 def decode_apple_token(token):
@@ -69,21 +73,73 @@ def generate_token():
     return token
 
 
-@api_router_login.get("/apple/callback")
+@api_router_login.get('/apple/redirect')
+async def apple_get_redirect(
+    access_token: str,
+    refresh_token: str,
+    request: Request
+):
+    # Send user to the world
+    params = dict()
+    params["access_token"] = access_token
+    params["refresh_token"] = refresh_token
+    url_params = urlencode(params)
+
+    base_url = settings.BASE_URL
+    full_url = f"{base_url}/"
+    world_url = full_url + "worldaccess"
+    world_url_params = world_url + "?" + url_params
+    return RedirectResponse(world_url_params)
+
+
+@api_router_login.post("/apple/callback")
 async def apple_callback(
-    code: str,
+    code: Annotated[str, Form()],
+    id_token: Annotated[str, Form()],
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
-    print("apple callback!")
-    request_base_url = str(request.base_url)
-    print("request_base_url", request_base_url)
-    request_base_url = request_base_url.replace("http://", "https://", 1)
-    print("request_base_url", request_base_url)
-    login_url = request_base_url.replace("/login/apple/callback", "/")
-    print("login_url", login_url)
-    print(f"full url: {request.url}")
-    print(f"code: {code}")
+    apple_key_url = settings.APPLE_AUTHORIZE
+    userinfo_response = requests.post(
+        apple_key_url, headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={
+            "client_id": settings.APPLE_CLIENT_ID,
+            "client_secret": generate_token(),
+            "code": code,
+            "grant_type": settings.APPLE_GRANT_TYPE,
+            "redirect_uri": settings.APPLE_REDIRECT_URL,
+        }
+    )
+
+    if not userinfo_response.json().get("access_token") or not userinfo_response.json().get("refresh_token") or not userinfo_response.json().get("id_token"): 
+        return get_failed_response("User email not available or not verified by Apple.", response)
+
+    [success, [_, _, user, user_created]] = await log_user_in(userinfo_response, db)
+    if success:
+        # Valid login, we refresh the token for this user.
+        user_token = get_user_tokens(user)
+        db.add(user_token)
+        await db.commit()
+
+        if user_created:
+            user = user.serialize_no_detail
+        else:
+            user = user.serialize
+
+        params = dict()
+        params["access_token"] = user_token.access_token
+        params["refresh_token"] = user_token.refresh_token
+        params["code"] = code
+
+        url_params = urlencode(params)
+
+        base_url = settings.BASE_URL
+        full_url = f"{base_url}/login/apple/redirect?" + url_params
+        return RedirectResponse(full_url, status_code=status.HTTP_302_FOUND)
+    else:
+        return get_failed_response("An error occurred", response)
+    
 
 
 @api_router_login.get("/apple/verify")
