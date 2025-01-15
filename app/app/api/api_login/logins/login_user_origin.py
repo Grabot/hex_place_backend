@@ -30,7 +30,7 @@ async def login_user_origin(
     statement_origin = (
         select(User)
         .where(User.origin == origin)
-        .where(func.lower(User.email_hash) == hashed_email)
+        .where(User.email_hash == hashed_email)
         .options(selectinload(User.friends))
         .options(selectinload(User.guild))
     )

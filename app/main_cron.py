@@ -21,14 +21,17 @@ def remove_expired_tokens():
         session.commit()
 
 
-# We create a separate cron worker for this because if we add the scheduler in the fastapi app,
-# it will create multiple cron jobs if we have multiple instances running.
-if __name__ == "__main__":
+async def main():
     scheduler = AsyncIOScheduler()
-    job = scheduler.add_job(remove_expired_tokens, trigger="cron", hour="0", minute="0")
+    scheduler.add_job(remove_expired_tokens, trigger="cron", hour="0", minute="0")
     scheduler.start()
 
+    # Keep the scheduler running
+    await asyncio.Future()  # An alternative to while True, keeps the loop running indefinitely
+
+
+if __name__ == "__main__":
     try:
-        asyncio.get_event_loop().run_forever()
+        asyncio.run(main())  # Ensure an event loop is properly started
     except (KeyboardInterrupt, SystemExit):
         pass

@@ -95,7 +95,6 @@ async def apple_get_redirect(
 @api_router_login.post("/apple/callback")
 async def apple_callback(
     code: Annotated[str, Form()],
-    id_token: Annotated[str, Form()],
     request: Request,
     response: Response,
     db: AsyncSession = Depends(get_db),
@@ -162,7 +161,7 @@ async def apple_verify(
     )
 
     if not userinfo_response.json().get("access_token") or not userinfo_response.json().get("refresh_token") or not userinfo_response.json().get("id_token"): 
-        return get_failed_response("User email not available or not verified by Google.", response)
+        return get_failed_response("User email not available or not verified by Apple.", response)
 
     [success, [_, _, user, user_created]] = await log_user_in(userinfo_response, db)
 

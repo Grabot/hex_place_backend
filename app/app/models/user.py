@@ -183,6 +183,7 @@ class User(SQLModel, table=True):
             "friends": self.get_friend_ids(),
             "avatar": self.get_user_avatar(True),
             "guild": self.guild.serialize if self.guild else None,
+            "origin": self.origin == 0, # we only want to know if it's a regular login
             "is_admin": self.is_admin,
         }
 
@@ -209,4 +210,5 @@ class User(SQLModel, table=True):
         return {
             "id": self.id,
             "username": self.username,
+            "origin": self.origin == 0,
         }
