@@ -36,7 +36,7 @@ async def verify_email_post(
     if user.is_verified():
         return {
             "result": True,
-            "message": "Email %s has already been verified!" % user.email,
+            "message": "Email %s has already been verified!" % user.email_hash,
         }
 
     else:
@@ -46,7 +46,7 @@ async def verify_email_post(
 
         return {
             "result": True,
-            "message": "Email %s is verified!" % user.email,
+            "message": "Email %s is verified!" % user.email_hash,
         }
 
 

@@ -27,7 +27,7 @@ async def reset_password(
 ) -> dict:
     email = password_reset_request.email
 
-    statement = select(User).where(User.origin == 0).where(func.lower(User.email) == email.lower())
+    statement = select(User).where(User.origin == 0).where(func.lower(User.email_hash) == email.lower())
     results = await db.execute(statement)
     result_user = results.first()
     if not result_user:
@@ -46,7 +46,7 @@ async def reset_password(
         base_url=settings.BASE_URL, token=reset_token, refresh_token=refresh_reset_token
     )
 
-    task = task_send_email.delay(user.username, user.email, subject, body)
+    task = task_send_email.delay(user.username, user.email_hash, subject, body)
 
     user_token = UserToken(
         user_id=user.id,
