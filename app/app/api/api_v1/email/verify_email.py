@@ -7,11 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.api_v1 import api_router_v1
 from app.util.rest_util import get_failed_response
-from app.celery_worker.tasks import task_send_email
-from app.config.config import settings
 from app.database import get_db
 from app.models import User, UserToken
-from app.util.email.verification_email import verification_email
 from app.util.util import check_token, get_auth_token, refresh_user_token
 
 
@@ -68,12 +65,12 @@ async def verify_email_get(
     refresh_token_expiration = int(time.time()) + refresh_expiration_time
     reset_token = user_request.generate_auth_token(access_expiration_time).decode("ascii")
     refresh_reset_token = user_request.generate_auth_token(refresh_expiration_time).decode("ascii")
-    subject = "Hex Place - Verify your email"
-    body = verification_email.format(
-        base_url=settings.BASE_URL, token=reset_token, refresh_token=refresh_reset_token
-    )
+    # subject = "Hex Place - Verify your email"
+    # body = verification_email.format(
+    #     base_url=settings.BASE_URL, token=reset_token, refresh_token=refresh_reset_token
+    # )
 
-    task = task_send_email.delay(user_request.username, user_request.email, subject, body)
+    # task = task_send_email.delay(user_request.username, user_request.email, subject, body)
 
     user_token = UserToken(
         user_id=user_request.id,

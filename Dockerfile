@@ -1,22 +1,30 @@
-FROM python:3.12.3-slim-bullseye
+FROM python:3.14.1-slim
 
-WORKDIR /app
-ENV PYTHONPATH=${PYTHONPATH}:${PWD}
+WORKDIR /
 
-# install static dependencies
-RUN apt-get update &&\
-    apt install -y git &&\
-    pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir poetry && \
-    pip3 install --no-cache-dir pre-commit && \
-    poetry config virtualenvs.create false
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git gcc libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# add dependency file
-COPY pyproject.toml /app/pyproject.toml
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir uv
 
-# install project dependencies
-RUN poetry install --no-root --only main
+ENV PYTHONPATH=${PYTHONPATH}:/app
 
-# add other project files
-COPY app /app/.
+COPY pyproject.toml /pyproject.toml
+COPY README.md /README.md
+
+RUN uv pip install --system --no-cache-dir -e .
 RUN mkdir -p static/uploads
+
+COPY app/boot.sh /boot.sh
+COPY app/main.py /main.py
+COPY app/migrations/ /migrations/
+COPY app/alembic.ini /alembic.ini
+
+COPY app/app/ /app/
+
+RUN useradd -r -s /bin/false -m celery && \
+    mkdir -p /home/celery/ && \
+    chown -R celery:celery /home/celery
+

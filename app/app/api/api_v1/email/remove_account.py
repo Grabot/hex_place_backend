@@ -7,11 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.api.api_v1 import api_router_v1
-from app.celery_worker.tasks import task_send_email
-from app.config.config import settings
+from app.celery_worker.tasks import task_send_email_delete_account
 from app.database import get_db
 from app.models import User, UserToken
-from app.util.email.delete_account_email import delete_account_email
 from app.util.rest_util import get_failed_response
 from app.util.util import refresh_user_token
 from sqlalchemy.orm import selectinload
@@ -28,10 +26,7 @@ async def send_delete_email(user: User, email: str, origin: int):
     refresh_delete_token = user.generate_refresh_token(refresh_expiration_time).decode("ascii")
 
     subject = "Hex Place - Delete your account"
-    body = delete_account_email.format(
-        base_url=settings.BASE_URL, token=delete_token, refresh_token=refresh_delete_token, origin=origin
-    )
-    _ = task_send_email.delay(user.username, email, subject, body)
+    _ = task_send_email_delete_account.delay(email, subject, delete_token, refresh_delete_token, str(origin))
 
     user_token = UserToken(
         user_id=user.id,

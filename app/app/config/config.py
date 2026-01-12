@@ -59,13 +59,13 @@ class Settings(BaseSettings):
     REDDIT_REDIRECT: str = "https://hexplace.eu/login/reddit/callback"
 
     APPLE_AUTHORIZE: str = "https://appleid.apple.com/auth/token"
-    APPLE_CLIENT_ID: str = os.environ.get("APPLE_CLIENT_ID", None)
+    APPLE_CLIENT_ID: str = os.environ.get("APPLE_CLIENT_ID", "")
     APPLE_AUD_URL: str = "https://appleid.apple.com"
-    APPLE_KEY_ID: str = os.environ.get("APPLE_KEY_ID", None)
-    APPLE_TEAM_ID: str = os.environ.get("APPLE_TEAM_ID", None)
-    APPLE_AUTH_KEY: str = os.environ.get("APPLE_AUTH_KEY", None)
+    APPLE_KEY_ID: str = os.environ.get("APPLE_KEY_ID", "")
+    APPLE_TEAM_ID: str = os.environ.get("APPLE_TEAM_ID", "")
+    APPLE_AUTH_KEY: str = os.environ.get("APPLE_AUTH_KEY", "")
     APPLE_GRANT_TYPE: str = "authorization_code"
-    APPLE_REDIRECT_URL: str = os.environ.get("APPLE_REDIRECT_URL", None)
+    APPLE_REDIRECT_URL: str = os.environ.get("APPLE_REDIRECT_URL", "")
 
     PACKAGE_NAME: str = "eu.hexplace.hex_place"
 
@@ -92,15 +92,15 @@ class Settings(BaseSettings):
     JWT_AUD: str = os.environ.get("JWT_AUD", "")
     API_SOCK_NAMESPACE: str = "/api/v1.0/sock"
 
-    MAIL_SERVER: str = os.environ.get("MAIL_SERVER")
-    MAIL_PORT: int = int(os.environ.get("MAIL_PORT") or 25)
-    MAIL_USE_TLS: int = os.environ.get("MAIL_USE_TLS") is not None
-    MAIL_USERNAME: str = os.environ.get("MAIL_USERNAME")
-    MAIL_PASSWORD: str = os.environ.get("MAIL_PASSWORD")
-    MAIL_SENDERNAME: str = os.environ.get("MAIL_SENDERNAME")
     BASE_URL: str = os.environ.get("BASE_URL")
-    UPLOAD_FOLDER_AVATARS : str= "/app/static/uploads/avatars"
-    UPLOAD_FOLDER_CRESTS: str = "/app/static/uploads/crests"
+    UPLOAD_FOLDER_AVATARS : str= "/static/uploads/avatars"
+    UPLOAD_FOLDER_CRESTS: str = "/static/uploads/crests"
+
+    SMTP_PASSWORD: str
+    SMTP_ACCOUNT: str
+    SMTP_USER: str
+    SMTP_HOST: str
+    SMTP_PORT: str
 
     class Config:
         case_sensitive = True

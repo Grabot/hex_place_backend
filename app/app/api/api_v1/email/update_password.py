@@ -31,6 +31,7 @@ async def update_password(
         return get_failed_response("user not found", response)
 
     new_password = password_update_request.new_password
+    await db.refresh(user)
     user.hash_password(new_password)
     db.add(user)
     await db.commit()

@@ -8,11 +8,10 @@ from sqlmodel import select
 
 from app.api.api_v1 import api_router_v1
 from app.util.rest_util import get_failed_response
-from app.celery_worker.tasks import task_send_email
-from app.config.config import settings
+from app.celery_worker.tasks import task_send_email_forgot_password
 from app.database import get_db
 from app.models import User, UserToken
-from app.util.email.reset_password_email import reset_password_email
+import hashlib
 
 
 class PasswordResetRequest(BaseModel):
@@ -27,7 +26,8 @@ async def reset_password(
 ) -> dict:
     email = password_reset_request.email
 
-    statement = select(User).where(User.origin == 0).where(func.lower(User.email_hash) == email.lower())
+    email_hash = hashlib.sha512(email.lower().encode("utf-8")).hexdigest()
+    statement = select(User).where(User.origin == 0).where(User.email_hash == email_hash)
     results = await db.execute(statement)
     result_user = results.first()
     if not result_user:
@@ -42,11 +42,7 @@ async def reset_password(
     refresh_reset_token = user.generate_refresh_token(refresh_expiration_time).decode("ascii")
 
     subject = "Hex Place - Change your password"
-    body = reset_password_email.format(
-        base_url=settings.BASE_URL, token=reset_token, refresh_token=refresh_reset_token
-    )
-
-    task = task_send_email.delay(user.username, user.email_hash, subject, body)
+    _ = task_send_email_forgot_password.delay(email, subject, reset_token, refresh_reset_token)
 
     user_token = UserToken(
         user_id=user.id,

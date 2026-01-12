@@ -13,7 +13,7 @@ services:
       - 5000:5000
     restart: always
     volumes:
-      - ${SHARED_DIR}:/app/static/uploads/
+      - ${SHARED_DIR}:/static/uploads/
       - ./app/migrations:/app/migrations
     command: "/bin/sh boot.sh"
     depends_on:
@@ -24,7 +24,7 @@ services:
   hex_db:
     container_name: hex_db
     env_file: .env
-    image: postgres:17beta3
+    image: postgres:18.1
     networks:
       - default
     ports:
@@ -60,25 +60,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ${SHARED_DIR}:/app/static/uploads/
+      - ${SHARED_DIR}:/static/uploads/
     depends_on:
       - redis
       - hex_db
-    command: "poetry run celery -A app.celery_worker.tasks worker -l info"
-
-  cron_worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file: .env
-    networks:
-      - default
-    restart: always
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    volumes:
-      - ${SHARED_DIR}:/app/static/uploads/
-    depends_on:
-      - redis
-      - hex_db
-    command: "python main_cron.py"
+    command: "celery -A app.celery_worker.tasks worker -l info"
