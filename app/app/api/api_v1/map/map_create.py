@@ -1,5 +1,3 @@
-import os
-import stat
 import json
 import time
 
@@ -9,10 +7,11 @@ from sqlmodel import select
 
 from app.api.api_v1 import api_router_v1
 from app.api.api_v1.map.map_utils import go_right
+from app.celery_worker.tasks import task_activate_celery
 from app.config.config import settings
 from app.database import get_db
 from app.models import Hexagon
-from app.celery_worker.tasks import task_initialize
+from app.util.s3_util import ensure_bucket
 
 
 @api_router_v1.post("/map/create", status_code=200)
@@ -51,14 +50,8 @@ async def create_map(db: AsyncSession = Depends(get_db)) -> dict:
 
 @api_router_v1.post("/initialize", status_code=200)
 async def initialize_folders() -> dict:
+    ensure_bucket()
 
-    if not os.path.exists(settings.UPLOAD_FOLDER_AVATARS):
-        os.makedirs(settings.UPLOAD_FOLDER_AVATARS)
-        os.chmod(settings.UPLOAD_FOLDER_AVATARS, stat.S_IRWXO)
-    if not os.path.exists(settings.UPLOAD_FOLDER_CRESTS):
-        os.makedirs(settings.UPLOAD_FOLDER_CRESTS)
-        os.chmod(settings.UPLOAD_FOLDER_CRESTS, stat.S_IRWXO)
-
-    _ = task_initialize.delay()
+    _ = task_activate_celery.delay()
 
     return {"results": "true"}

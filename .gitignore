@@ -135,3 +135,5 @@ _ignore/*
 
 kubernetes/kubernetes_production
 kubernetes/kubernetes_production/*
+kubernetes/kubernetes_production_2
+kubernetes/kubernetes_production_2/*

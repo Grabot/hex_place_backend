@@ -1,11 +1,11 @@
 import base64
-import os
 import secrets
 import time
 from datetime import datetime, timedelta
 from hashlib import md5
 from typing import List, Optional
 
+import pytz
 from authlib.jose import jwt
 from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy import Index
@@ -14,7 +14,7 @@ from sqlmodel import Field, Relationship, SQLModel, select
 
 from app.config.config import settings
 from app.models import Friend
-import pytz
+from app.util.s3_util import download_avatar
 
 
 class User(SQLModel, table=True):
@@ -142,6 +142,9 @@ class User(SQLModel, table=True):
     def avatar_filename_default(self):
         return self.avatar_filename() + "_default"
 
+    def avatar_s3_key(self, file_name: str):
+        return f"{settings.PROJECT_NAME}/avatars/{file_name}.png"
+
     def set_new_username(self, new_username):
         self.username = new_username
 
@@ -154,20 +157,18 @@ class User(SQLModel, table=True):
     def get_user_avatar(self, full=False):
         if self.default_avatar:
             file_name = self.avatar_filename_default()
+            encrypted = False
         else:
+            encrypted = True
             if full:
                 file_name = self.avatar_filename()
             else:
                 file_name = self.avatar_filename_small()
-        file_folder = settings.UPLOAD_FOLDER_AVATARS
 
-        file_path = os.path.join(file_folder, "%s.png" % file_name)
-        if not os.path.isfile(file_path):
+        image_bytes = download_avatar(self.avatar_s3_key(file_name), encrypted=encrypted)
+        if image_bytes is None:
             return None
-        else:
-            with open(file_path, "rb") as fd:
-                image_as_base64 = base64.encodebytes(fd.read()).decode()
-            return image_as_base64
+        return base64.encodebytes(image_bytes).decode()
 
     def get_friend_ids(self):
         return [friend.serialize_minimal for friend in self.friends]

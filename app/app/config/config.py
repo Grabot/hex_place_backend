@@ -93,7 +93,14 @@ class Settings(BaseSettings):
     API_SOCK_NAMESPACE: str = "/api/v1.0/sock"
 
     BASE_URL: str = os.environ.get("BASE_URL")
-    UPLOAD_FOLDER_AVATARS : str= "/static/uploads/avatars"
+    S3_ENDPOINT: str = os.environ.get("S3_ENDPOINT", "http://minio:9000")
+    S3_ACCESS_KEY: str = os.environ.get("S3_ACCESS_KEY", "minioadmin")
+    S3_SECRET_KEY: str = os.environ.get("S3_SECRET_KEY", "minioadmin")
+    S3_BUCKET_NAME: str = os.environ.get("S3_BUCKET_NAME", "hexplace")
+    S3_ENCRYPTION_KEY: str = os.environ.get(
+        "S3_ENCRYPTION_KEY", "FP4a3c-WnjE6IboX3gBMrGPUsaPK7gkrxKxcQme37g0="
+    )
+    PROJECT_NAME: str = "hex_place"
     UPLOAD_FOLDER_CRESTS: str = "/static/uploads/crests"
 
     SMTP_PASSWORD: str

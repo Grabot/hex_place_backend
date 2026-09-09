@@ -1,15 +1,14 @@
 import base64
-import os
 from typing import Optional
 
 from fastapi import Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.api_v1 import api_router_v1
-from app.util.rest_util import get_failed_response
-from app.config.config import settings
 from app.database import get_db
 from app.models import User
+from app.util.rest_util import get_failed_response
+from app.util.s3_util import download_avatar
 from app.util.util import check_token, get_auth_token
 
 
@@ -32,14 +31,9 @@ async def reset_avatar(
     db.add(user_avatar)
     await db.commit()
 
-    file_folder = settings.UPLOAD_FOLDER_AVATARS
     file_name = user_avatar.avatar_filename_default()
-    file_path = os.path.join(file_folder, "%s.png" % file_name)
-
-    if not os.path.isfile(file_path):
+    image_bytes = download_avatar(user_avatar.avatar_s3_key(file_name), encrypted=False)
+    if image_bytes is None:
         return get_failed_response("An error occurred", response)
-    else:
-        with open(file_path, "rb") as fd:
-            image_as_base64 = base64.encodebytes(fd.read()).decode()
 
-        return {"result": True, "message": image_as_base64}
+    return {"result": True, "message": base64.encodebytes(image_bytes).decode()}

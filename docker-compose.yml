@@ -13,11 +13,11 @@ services:
       - 5000:5000
     restart: always
     volumes:
-      - ${SHARED_DIR}:/static/uploads/
       - ./app/migrations:/app/migrations
     command: "/bin/sh boot.sh"
     depends_on:
       - hex_db
+      - minio
     links:
       - hex_db
 
@@ -49,6 +49,19 @@ services:
     command:
       - redis-server
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
   worker:
     build:
       context: .
@@ -59,9 +72,11 @@ services:
     restart: always
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - ${SHARED_DIR}:/static/uploads/
     depends_on:
       - redis
       - hex_db
+      - minio
     command: "celery -A app.celery_worker.tasks worker -l info"
+
+volumes:
+  minio_data:

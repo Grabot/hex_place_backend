@@ -1,7 +1,5 @@
 import base64
 import io
-import os
-import stat
 from typing import Optional
 
 from fastapi import Depends, Request, Response
@@ -10,10 +8,10 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.api_v1 import api_router_v1
-from app.util.rest_util import get_failed_response
-from app.config.config import settings
 from app.database import get_db
 from app.models import User
+from app.util.rest_util import get_failed_response
+from app.util.s3_util import upload_avatar
 from app.util.util import check_token, get_auth_token
 
 
@@ -44,18 +42,16 @@ async def change_avatar(
     new_avatar_pil = Image.open(io.BytesIO(base64.b64decode(new_avatar)))
     new_avatar_small_pil = Image.open(io.BytesIO(base64.b64decode(new_avatar_small)))
 
-    # Get the file name and path
-    file_folder = settings.UPLOAD_FOLDER_AVATARS
     file_name = user.avatar_filename()
-    file_name_small = user.avatar_filename() + "_small"
-    # Store the image under the same hash but without the "default".
-    file_path = os.path.join(file_folder, "%s.png" % file_name)
-    file_path_small = os.path.join(file_folder, "%s.png" % file_name_small)
+    file_name_small = user.avatar_filename_small()
 
-    new_avatar_pil.save(file_path)
-    new_avatar_small_pil.save(file_path_small)
-    os.chmod(file_path, stat.S_IRWXO)
-    os.chmod(file_path_small, stat.S_IRWXO)
+    full_buffer = io.BytesIO()
+    new_avatar_pil.save(full_buffer, format="PNG")
+    small_buffer = io.BytesIO()
+    new_avatar_small_pil.save(small_buffer, format="PNG")
+
+    upload_avatar(full_buffer.getvalue(), user.avatar_s3_key(file_name))
+    upload_avatar(small_buffer.getvalue(), user.avatar_s3_key(file_name_small))
 
     user.set_default_avatar(False)
     db.add(user)
